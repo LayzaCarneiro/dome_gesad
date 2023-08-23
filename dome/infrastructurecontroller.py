@@ -209,9 +209,7 @@ class InterfaceController:
                 # all fields with the same type, in this version.
                 elif att.type == 'fk':
                         name = att.name[:-3]
-                        strFileBuffer += f"\n    {att.name} = models.CharField(max_length=200, null={not att.notnull}, blank={not att.notnull})"
-                        # strFileBuffer += f"\n    {att.name} = models.ForeignKey({name.title()}, on_delete=models.CASCADE, null={not att.notnull}, blank={not att.notnull})"
-                
+                        strFileBuffer += f"\n    {att.name} = models.ForeignKey({name.title()}, on_delete=models.CASCADE, null={not att.notnull}, blank={not att.notnull})"
                 else:
                     strFileBuffer += f'\n    {att.name} = models.CharField(max_length=200, null={not att.notnull}, ' \
                                 f'blank={not att.notnull})'
