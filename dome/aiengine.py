@@ -452,7 +452,6 @@ class AIEngine(DAO):
 
             # iterate over the tags after the verb token (intent)
             for token in self.tokens:
-                print(token)
                 if (token['entity'] == 'NOUN' and  # only nouns
                         not (token['word'] in attributes)):  # not a known attribute
                     if len(candidates) == 0:

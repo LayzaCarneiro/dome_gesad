@@ -174,7 +174,6 @@ class InterfaceController:
             strFileBuffer += 'class ' + entity.name + 'Admin(BaseAdmin):\n'
             strFileBuffer += '    list_display = ("id", '
             for attribute in entity.getAttributes():
-                print(attribute.name)
                 if attribute.name != 'id':
                     strFileBuffer += '"' + attribute.name + '", '
             strFileBuffer += ')\n'
@@ -183,6 +182,7 @@ class InterfaceController:
         strFileBuffer += '\nadmin.site.unregister(Group)'
         strFileBuffer += '\nadmin.site.unregister(User)\n'
 
+        print(strFileBuffer)
         overwriting_file(self.__webapp_path + '\\admin.py', strFileBuffer)
 
         # update models.py
@@ -209,7 +209,7 @@ class InterfaceController:
                 # all fields with the same type, in this version.
                 elif att.type == 'fk':
                         name = att.name[:-3]
-                        strFileBuffer += f"\n    {att.name} = models.ForeignKey({name.title()}, on_delete=models.CASCADE, null={not att.notnull}, blank={not att.notnull})"
+                        strFileBuffer += f"\n    {att.name} = models.ForeignKey({name.title()}, on_delete=models.CASCADE, null=False, blank=False)"
                 else:
                     strFileBuffer += f'\n    {att.name} = models.CharField(max_length=200, null={not att.notnull}, ' \
                                 f'blank={not att.notnull})'
@@ -227,7 +227,6 @@ class InterfaceController:
                 strFileBuffer = strFileBuffer[:-3] + '"'
 
         # re-writing the model.py file
-        print(strFileBuffer)
         overwriting_file(self.__webapp_path + '\\models.py', strFileBuffer)
         self.migrateModel()
 

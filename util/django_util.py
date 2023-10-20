@@ -18,7 +18,6 @@ def get_django_pwd() -> str:
         os.environ['DJANGO_SUPERUSER_PASSWORD'] = DJANGO_SUPERUSER_DEFAULT_PASSWORD
     return os.environ['DJANGO_SUPERUSER_PASSWORD']
 
-
 def get_django_email() -> str:
     if "DJANGO_SUPERUSER_EMAIL" not in os.environ:
         os.environ['DJANGO_SUPERUSER_EMAIL'] = DJANGO_SUPERUSER_DEFAULT_EMAIL

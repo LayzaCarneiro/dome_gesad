@@ -83,7 +83,8 @@ class DomainEngine:
         sql_cmd += "(dome_created_at, dome_updated_at, "
         for k in attributes.keys():
             if self.entityExists(k):
-                sql_cmd += k + "_id_id, "
+                print(k)
+                sql_cmd += k + "_id, "
             else:
                 sql_cmd += k + ", "
         sql_cmd = sql_cmd[:-2]  # removing the last comma
@@ -156,8 +157,6 @@ class DomainEngine:
                 else:
                     sql_cmd += "LOWER(" + k + ") LIKE LOWER('%" + where_clause[k] + "%') AND "
             sql_cmd = sql_cmd[:-4]  # removing the last AND
-        print("where-clause")
-        print(sql_cmd)
         self.__executeSqlCmd(sql_cmd)
 
     def read(self, entity, attributes):

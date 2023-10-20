@@ -94,6 +94,8 @@ class AutonomousController:
         user_data['pending_where_clause'] = {}
 
     def app_chatbot_msg_handler(self, msg, context, dth_income_message):
+        print(context)
+
         is_DDoS = self.__SE.is_DDoS(context._user_id_and_data[0], dth_income_message)
         if is_DDoS:
             return DDoS_MSG
