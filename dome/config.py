@@ -1,5 +1,7 @@
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # intent mapping
 # >>>>> !!! DON'T CHANGE THE KEYS OF THE INTENT_MAP !!! <<<<<
 # >>>>> !!! KEEP ALL ELEMENTS OF THE VALUE LISTS IN LOWER CASE !!! <<<<<

@@ -4,7 +4,7 @@ import time
 
 from dome.aiengine import AIEngine, Intent
 from dome.auxiliary.constants import (OPR_APP_HOME_CMD,
-                                      OPR_APP_HOME_WEB,
+                                      OPR_APP_HOME_WEB, OPR_APP_SERVER_START,
                                       OPR_APP_TELEGRAM_START,
                                       OPR_ATTRIBUTE_ADD, OPR_ENTITY_ADD)
 from dome.config import (ATTRIBUTE_FORMAT, ATTRIBUTE_OK,
@@ -55,6 +55,9 @@ class AutonomousController:
         elif opr == OPR_APP_TELEGRAM_START:
             self.__IC.update_app_web(True)
             self.__IC.startApp_telegram(self.app_chatbot_msg_handler)
+            return True  # TODO: to analyse return type/value
+        elif opr == OPR_APP_SERVER_START:
+            self.__IC.startApp_server(self.app_chatbot_msg_process)
             return True  # TODO: to analyse return type/value
         # else
 
