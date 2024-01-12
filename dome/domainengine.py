@@ -56,15 +56,7 @@ class DomainEngine:
     def entityExists(self, entity_name):
         return entity_name in self.__entities_map.keys()
 
-    def __executeSqlCmd(self, sqlCmd):
-        if self.__TDB is None:
-            self.__TDB = sqlite3.connect(self.__AC.getTransactionDB_path(), check_same_thread=False)
-        result = self.__TDB.cursor().execute(sqlCmd)
-        self.__TDB.commit()
-
-        return result
-    
-    def __executeSqlCmdWithParams(self, sqlCmd, params):
+    def __executeSqlCmd(self, sqlCmd, params=()):
         if self.__TDB is None:
             self.__TDB = sqlite3.connect(self.__AC.getTransactionDB_path(), check_same_thread=False)
         result = self.__TDB.cursor().execute(sqlCmd, params)
@@ -82,11 +74,7 @@ class DomainEngine:
         sql_cmd = "INSERT OR REPLACE INTO " + self.__getEntityDBName(entity)
         sql_cmd += "(dome_created_at, dome_updated_at, "
         for k in attributes.keys():
-            if self.entityExists(k):
-                print(k)
-                sql_cmd += k + "_id, "
-            else:
-                sql_cmd += k + ", "
+            sql_cmd += k + ", "
         sql_cmd = sql_cmd[:-2]  # removing the last comma
         sql_cmd += ") values((datetime('now', 'localtime')), (datetime('now', 'localtime')), "
         
@@ -94,7 +82,7 @@ class DomainEngine:
             if self.entityExists(k):
                sql_cmd2 = "SELECT id FROM " + self.__getEntityDBName(k) + " WHERE name = ?"
                params = (str(v),)
-               query = self.__executeSqlCmdWithParams(sql_cmd2, params)
+               query = self.__executeSqlCmd(sql_cmd2, params)
 
                row = query.fetchone()
 
@@ -116,7 +104,7 @@ class DomainEngine:
 
         sql_cmd = sql_cmd[:-2]  # removing the last comma
         sql_cmd += ")"
-        #print(sql_cmd)
+        print(sql_cmd)
         self.__executeSqlCmd(sql_cmd)
 
     def update(self, entity, attributes, where_clause):
@@ -130,7 +118,7 @@ class DomainEngine:
             if(self.entityExists(attribute_name)):
                 sql_cmd2 = "SELECT id FROM " + self.__getEntityDBName(attribute_name) + " WHERE name = ?"
                 params = (str(attribute_value),)
-                query = self.__executeSqlCmdWithParams(sql_cmd2, params)
+                query = self.__executeSqlCmd(sql_cmd2, params)
 
                 row = query.fetchone()
 
@@ -142,7 +130,7 @@ class DomainEngine:
                      att_val = str(attribute_value)
 
                 att_val = att_val.replace("'", "")
-                sql_cmd += ' ' + attribute_name + "_id='" + att_val + "',"
+                sql_cmd += ' ' + attribute_name + "='" + att_val + "',"
 
             else:
                 sql_cmd += ' ' + attribute_name + "='" + attribute_value + "',"

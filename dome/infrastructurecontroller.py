@@ -1,6 +1,6 @@
 from dome.aiengine import AIEngine
-from dome.config import RUN_WEB_SERVER, SUFFIX_CONFIG, SUFFIX_ENV, SUFFIX_WEB, DEBUG_MODE, MANAGED_SYSTEM_WEBAPP_TITLE, \
-    NUMBER_MAX_FIELDS_IN_MODELS_TO_STR_FUNCTION, PRINT_DEBUG_MSGS
+from dome.config import (SUFFIX_CONFIG, SUFFIX_ENV, SUFFIX_WEB, DEBUG_MODE, MANAGED_SYSTEM_WEBAPP_TITLE, 
+                         NUMBER_MAX_FIELDS_IN_MODELS_TO_STR_FUNCTION, PRINT_DEBUG_MSGS)
 from dome.analyticsengine import AnalyticsEngine
 from dome.businessprocessengine import BusinessProcessEngine
 import os
@@ -138,19 +138,10 @@ class InterfaceController:
 
         self.migrateModel()
 
-    def __run_server(self):
-        if not RUN_WEB_SERVER:
-            return False
-        print('running the web server')
-        self.__runAsyncCmd(
-            os.getcwd() + '\\Scripts\\python.exe ' +
-            os.getcwd() + '\\' + self.__config_path + '\\manage.py runserver 0.0.0.0:80 --skip-checks')  # 127.0.0.1:8080 --skip-checks')  # --noreload')
-        return True
-
     def getApp_cmd(self, msgHandle):
         return self.__AIE.getNLPEngine().interactive(msgHandle)
 
-    def startApp_telegram(self, msgHandle):
+    def startApp_telegram(self, msgHandle): 
         if self.__TELEGRAM_HANDLE is None:
             self.__TELEGRAM_HANDLE = TelegramHandler(msgHandle)
         return True
@@ -181,10 +172,9 @@ class InterfaceController:
 
         strFileBuffer += '\nadmin.site.unregister(Group)'
         strFileBuffer += '\nadmin.site.unregister(User)\n'
-
-        print(strFileBuffer)
         overwriting_file(self.__webapp_path + '\\admin.py', strFileBuffer)
 
+        print(strFileBuffer)
         # update models.py
         if DEBUG_MODE and PRINT_DEBUG_MSGS:
             print('updating models.py...')
@@ -203,13 +193,14 @@ class InterfaceController:
             attributes_to_use_in_str = []
             # adding the other attributes
             for att in entity.getAttributes():
+                print(att.name)
+                print(att.type)
                 if att.name == 'id':
                     # for django, the id is the primary key, and it is automatically created
                     continue
                 # all fields with the same type, in this version.
-                elif att.type == 'fk':
-                        name = att.name[:-3]
-                        strFileBuffer += f"\n    {att.name} = models.ForeignKey({name.title()}, on_delete=models.CASCADE, null=False, blank=False)"
+                if att.type == 'fk':
+                        strFileBuffer += f"\n    {att.name} = models.ForeignKey({(att.name).title()}, on_delete=models.CASCADE, null=False, blank=False)"
                 else:
                     strFileBuffer += f'\n    {att.name} = models.CharField(max_length=200, null={not att.notnull}, ' \
                                 f'blank={not att.notnull})'
@@ -228,12 +219,11 @@ class InterfaceController:
 
         # re-writing the model.py file
         overwriting_file(self.__webapp_path + '\\models.py', strFileBuffer)
+        print(strFileBuffer)
         self.migrateModel()
 
-    def update_app_web(self, run_server=False):
+    def update_app_web(self):
         self.update_model()
-        if run_server:
-            self.__run_server()
 
     # util methods
     def __getEntities(self) -> list:
