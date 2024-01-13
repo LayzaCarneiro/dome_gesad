@@ -53,11 +53,10 @@ class AutonomousController:
             self.__IC.update_app_web()
             return True
         elif opr == OPR_APP_TELEGRAM_START:
-            self.__IC.update_app_web()
+            self.__IC.update_app_web(True)
             self.__IC.startApp_telegram(self.app_chatbot_msg_handler)
             return True  # TODO: to analyse return type/value
         # else
-
         return None
 
     def __knowledge(self):
@@ -118,7 +117,7 @@ class AutonomousController:
         self.__SE.save_msg_handle_log(msg, user_data['id'], response, time.perf_counter() - t0)
 
         if DEBUG_MODE:
-            return "<b>[DEBUG_MODE_ON]</b>\n" + response['response_msg'] 
+            return "<b>[DEBUG_MODE_ON]</b>\n" + response['response_msg']
         # else:
         return response['response_msg']
 
@@ -126,16 +125,13 @@ class AutonomousController:
         # updating the internal domain model entities and attributes
         domain_entity = self.__DE.saveEntity(user_data['pending_class'])
         for att_name in user_data['pending_attributes'].keys():
-            if(self.__DE.entityExists(att_name)): 
+            if(self.__DE.entityExists(att_name)):
                 self.__DE.addAttribute(domain_entity, att_name, 'fk')
             else:
                 self.__DE.addAttribute(domain_entity, att_name, 'str')
         if 'pending_where_clause' in user_data and user_data['pending_where_clause']:
             for att_name in user_data['pending_where_clause'].keys():
-                if(self.__DE.entityExists(att_name)): 
-                    self.__DE.addAttribute(domain_entity, att_name, 'fk')
-                else:
-                    self.__DE.addAttribute(domain_entity, att_name, 'str')
+                self.__DE.addAttribute(domain_entity, att_name, 'str')
         try:
             self.__IC.update_app_web()
         except BaseException:

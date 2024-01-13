@@ -118,6 +118,7 @@ DDoS_MSG = "Sorry, but you are sending too many requests per second, and you'll 
 DDoS_PENALTY = 60  # seconds
 
 # production variables
+RUN_WEB_SERVER = True
 USE_PARSER_CACHE = False
 DEBUG_MODE = False
 PRINT_DEBUG_MSGS = True

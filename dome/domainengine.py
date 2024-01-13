@@ -74,7 +74,10 @@ class DomainEngine:
         sql_cmd = "INSERT OR REPLACE INTO " + self.__getEntityDBName(entity)
         sql_cmd += "(dome_created_at, dome_updated_at, "
         for k in attributes.keys():
-            sql_cmd += k + ", "
+            if(self.entityExists(k)):
+                sql_cmd += k + "_id, "
+            else:
+                sql_cmd += k + ", "
         sql_cmd = sql_cmd[:-2]  # removing the last comma
         sql_cmd += ") values((datetime('now', 'localtime')), (datetime('now', 'localtime')), "
         
