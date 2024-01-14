@@ -1,4 +1,5 @@
 from dome.aiengine import AIEngine
+from dome.auxiliary.server import startServer
 from dome.config import RUN_WEB_SERVER, SUFFIX_CONFIG, SUFFIX_ENV, SUFFIX_WEB, DEBUG_MODE, MANAGED_SYSTEM_WEBAPP_TITLE, \
     NUMBER_MAX_FIELDS_IN_MODELS_TO_STR_FUNCTION, PRINT_DEBUG_MSGS
 from dome.analyticsengine import AnalyticsEngine
@@ -44,6 +45,7 @@ class InterfaceController:
         self.__BPE = BusinessProcessEngine(self)  # relation 8.2
         self.__AE = AnalyticsEngine(self)  # relation 8.3
         self.__TELEGRAM_HANDLE = None
+        self.__SERVER_HANDLE = None
         self.__WEBSERVER_PROCESS = None
         self.__root_path = os.path.dirname(os.path.dirname(__file__))  # get the parent directory
         os.chdir(self.__root_path)
@@ -153,6 +155,10 @@ class InterfaceController:
     def startApp_telegram(self, msgHandle):
         if self.__TELEGRAM_HANDLE is None:
             self.__TELEGRAM_HANDLE = TelegramHandler(msgHandle)
+        return True
+    def startApp_server(self, msgHandle):
+        if self.__SERVER_HANDLE is None:
+            self.__SERVER_HANDLE = startServer(msgHandle)
         return True
 
     def update_model(self):
