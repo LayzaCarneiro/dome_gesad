@@ -131,7 +131,10 @@ class AutonomousController:
                 self.__DE.addAttribute(domain_entity, att_name, 'str')
         if 'pending_where_clause' in user_data and user_data['pending_where_clause']:
             for att_name in user_data['pending_where_clause'].keys():
-                self.__DE.addAttribute(domain_entity, att_name, 'str')
+                if(self.__DE.entityExists(att_name)):
+                    self.__DE.addAttribute(domain_entity, att_name, 'fk')
+                else:
+                    self.__DE.addAttribute(domain_entity, att_name, 'str')
         try:
             self.__IC.update_app_web()
         except BaseException:
