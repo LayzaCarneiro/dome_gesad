@@ -81,7 +81,7 @@ class AutonomousController:
             self.__IC.startApp_telegram(self.app_chatbot_msg_handler)
             return True  # TODO: to analyse return type/value
         elif opr == OPR_APP_SERVER_START:
-            self.__IC.startApp_server(self.app_chatbot_msg_handler)
+            self.__IC.startApp_server(self.app_chatbot_msg_handler_app)
             return True  # TODO: to analyse return type/value
         # else
         return None
@@ -124,6 +124,35 @@ class AutonomousController:
         user_data["pending_where_clause"] = {}
 
     def app_chatbot_msg_handler(self, msg, context, dth_income_message):
+        is_DDoS = self.__SE.is_DDoS(context._user_id_and_data[0], dth_income_message)
+        if is_DDoS:
+            return DDoS_MSG
+        # else: all ok
+        t0 = time.perf_counter()
+        if 'id' not in context.user_data:
+            # new session
+            user_data = self.__SE.create_or_get_user(context._user_id_and_data[0])
+            self.clear_opr(user_data)
+            context.user_data.update(user_data)
+
+        user_data = context.user_data
+
+        try:
+            response = self.app_chatbot_msg_process(msg, user_data=user_data)
+        except BaseException as e:
+            print('GENERAL_FAILURE', e)
+            response = {'user_msg': msg, 'response_msg': GENERAL_FAILURE, 'user_data': user_data, 'error': e}
+            self.clear_opr(user_data)
+
+        # logging the message handled
+        self.__SE.save_msg_handle_log(msg, user_data['id'], response, time.perf_counter() - t0)
+
+        if DEBUG_MODE:
+            return "<b>[DEBUG_MODE_ON]</b>\n" + response['response_msg'] 
+        # else:
+        return response['response_msg']
+    
+    def app_chatbot_msg_handler_app(self, msg, context, dth_income_message):
         is_DDoS = self.__SE.is_DDoS(context["chat_id"], dth_income_message)
         if is_DDoS:
             return DDoS_MSG
@@ -164,13 +193,13 @@ class AutonomousController:
         domain_entity = self.__DE.saveEntity(user_data["pending_class"])
         for att_name in user_data["pending_attributes"].keys():
             if self.__DE.entityExists(att_name):
-                self.__DE.addAttribute(domain_entity, att_name + "_id", "fk")
+                self.__DE.addAttribute(domain_entity, att_name, "fk")
             else:
                 self.__DE.addAttribute(domain_entity, att_name, "str")
         if "pending_where_clause" in user_data and user_data["pending_where_clause"]:
             for att_name in user_data["pending_where_clause"].keys():
                 if self.__DE.entityExists(att_name):
-                    self.__DE.addAttribute(domain_entity, att_name + "_id", "fk")
+                    self.__DE.addAttribute(domain_entity, att_name, "fk")
                 else:
                     self.__DE.addAttribute(domain_entity, att_name, "str")
         try:

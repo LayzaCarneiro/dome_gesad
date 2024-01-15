@@ -1,7 +1,7 @@
 import logging
 import os
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import datetime as dth
 
 
@@ -31,7 +31,7 @@ class TelegramHandler:
         dp.add_handler(CommandHandler("help", self.help))
 
         # on command i.e. message - echo the message on Telegram
-        dp.add_handler(MessageHandler(filters.text, self.echo))
+        dp.add_handler(MessageHandler(Filters.text, self.echo))
 
         # log all errors
         dp.add_error_handler(self.error)

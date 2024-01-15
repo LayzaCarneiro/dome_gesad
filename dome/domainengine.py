@@ -93,21 +93,16 @@ class DomainEngine:
                     id = row[0]
                     att_val = str(id)
                else:
-                    # print("Nenhum registro encontrado na tabela.")
-                    att_val = str(v)
-                
-               att_val = att_val.replace("'", "") # removing ' from the string to prevent syntax errors
-               sql_cmd += "'" + att_val + "', "
+                    att_val = str(v) # doesn't exists this value in the table
         
             else:
                 att_val = str(v)
-                # removing ' from the string to prevent syntax errors
-                att_val = att_val.replace("'", "")
-                sql_cmd += "'" + att_val + "', "
+                
+            att_val = att_val.replace("'", "") # removing ' from the string to prevent syntax errors
+            sql_cmd += "'" + att_val + "', "
 
         sql_cmd = sql_cmd[:-2]  # removing the last comma
         sql_cmd += ")"
-        print(sql_cmd)
         self.__executeSqlCmd(sql_cmd)
 
     def update(self, entity, attributes, where_clause):
@@ -128,8 +123,7 @@ class DomainEngine:
                 if row is not None:
                      id = row[0]
                      att_val = str(id)
-                else:
-                     # print("Nenhum registro encontrado na tabela.")
+                else: # doesn't exists this value in the table
                      att_val = str(attribute_value)
 
                 att_val = att_val.replace("'", "")

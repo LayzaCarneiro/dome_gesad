@@ -6,7 +6,7 @@ class MultiChannelApp:
     # initializing singleton static instances
     __instance = None
 
-    def __init__(self, run_telegram=True, run_server=False):
+    def __init__(self, run_telegram, run_server):
         if MultiChannelApp.__instance is None:
             MultiChannelApp.__instance = self
             self.__SE = SecurityEngine(self)
