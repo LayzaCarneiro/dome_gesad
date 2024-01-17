@@ -145,7 +145,6 @@ class DomainEngine:
         self.__executeSqlCmd(sql_cmd)
 
     def read(self, entity, attributes):
-
         if not self.entityExists(entity):
             return None
         # else: entity exists
@@ -167,6 +166,7 @@ class DomainEngine:
         # put limit to LIMIT_REGISTERS
         sql_cmd += " LIMIT " + str(LIMIT_REGISTERS)
 
+        print(sql_cmd)
         query = self.__executeSqlCmd(sql_cmd)
         cols = [column[0] for column in query.description]
         data = query.fetchall()

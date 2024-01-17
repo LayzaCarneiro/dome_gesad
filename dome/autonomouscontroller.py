@@ -36,9 +36,11 @@ from dome.config import (
     MAX_USER_MSG_SIZE,
     MAX_USER_MSG_SIZE_MSG,
     DDoS_MSG,
+    MEDIA
 )
 from dome.domainengine import DomainEngine
 from dome.infrastructurecontroller import InterfaceController
+from dome.analyticsengine import AnalyticsEngine
 
 
 class AutonomousController:
@@ -47,6 +49,7 @@ class AutonomousController:
         self.__IC = InterfaceController(self)  # Interface Controller object
         self.__DE = DomainEngine(self)  # Domain Engine object
         self.__AIE = AIEngine(self)  # Artificial Intelligence Engine object
+        self.__AE = AnalyticsEngine(self) # Analytics toolset
 
     def __monitor(self):
         pass
@@ -226,7 +229,6 @@ class AutonomousController:
 
         if len(msg) <= MAX_USER_MSG_SIZE:
             parser = self.__AIE.get_msg_parser(msg)
-
             if parser.intent == Intent.CONFIRMATION:
                 if (
                     user_data["pending_intent"] is not None
@@ -235,7 +237,7 @@ class AutonomousController:
                         (len(user_data["pending_attributes"]) > 0)
                         or (user_data["pending_intent"] == Intent.READ)
                     )
-                ):
+                ):  
                     if user_data["pending_intent"] == Intent.ADD:
                         # updating the model
                         self.__update_model(user_data)
@@ -348,7 +350,10 @@ class AutonomousController:
                     else:  # all right. one class use case
                         user_data["pending_class"] = parser.entity_class
                         # if is DELETE or READ use case, test if the class is in the domain
-                        if (
+                        print(user_data)
+                        if user_data["pending_class"] == "media":
+                            msg_return_list = MEDIA(self.__AE.media("student", "grade"))
+                        elif (
                             not self.__DE.entityExists(user_data["pending_class"])
                         ) and (
                             (user_data["pending_intent"] == Intent.DELETE)

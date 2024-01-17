@@ -43,7 +43,7 @@ class InterfaceController:
         self.__AC = AC  # Autonomous Controller Object
         self.__AIE = AIEngine(AC)  # relation 8.1
         self.__BPE = BusinessProcessEngine(self)  # relation 8.2
-        self.__AE = AnalyticsEngine(self)  # relation 8.3
+        self.__AE = AnalyticsEngine(AC)  # relation 8.3
         self.__TELEGRAM_HANDLE = None
         self.__SERVER_HANDLE = None
         self.__WEBSERVER_PROCESS = None
