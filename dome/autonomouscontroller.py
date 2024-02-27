@@ -36,7 +36,11 @@ from dome.config import (
     MAX_USER_MSG_SIZE,
     MAX_USER_MSG_SIZE_MSG,
     DDoS_MSG,
-    MEDIA
+    ANALYTICS,
+    AVERAGE,
+    HIGHEST,
+    LOWEST,
+    SUM
 )
 from dome.domainengine import DomainEngine
 from dome.infrastructurecontroller import InterfaceController
@@ -144,7 +148,10 @@ class AutonomousController:
             response = self.app_chatbot_msg_process(msg, user_data=user_data)
         except BaseException as e:
             print('GENERAL_FAILURE', e)
-            response = {'user_msg': msg, 'response_msg': GENERAL_FAILURE, 'user_data': user_data, 'error': e}
+            response = {'user_msg': msg, 
+                        'response_msg': 'Sorry, but I could not complete the operation. Ocurred the error: <b>' + str(e) + '</b>.\nPlease, try again using other words.\n(say <b>HELP</b> for examples)', 
+                        'user_data': user_data, 
+                        'error': e}
             self.clear_opr(user_data)
 
         # logging the message handled
@@ -175,7 +182,7 @@ class AutonomousController:
             print("GENERAL_FAILURE", e)
             response = {
                 "user_msg": msg,
-                "response_msg": GENERAL_FAILURE,
+                "response_msg": 'Sorry, but I could not complete the operation. Ocurred the error: <b>' + str(e) + '</b>.\nPlease, try again using other words.\n(say <b>HELP</b> for examples)',
                 "user_data": user_data,
                 "error": e,
             }
@@ -194,17 +201,23 @@ class AutonomousController:
     def __update_model(self, user_data):
         # updating the internal domain model entities and attributes
         domain_entity = self.__DE.saveEntity(user_data["pending_class"])
-        for att_name in user_data["pending_attributes"].keys():
+        for att_name, att_value in user_data["pending_attributes"].items():
             if self.__DE.entityExists(att_name):
                 self.__DE.addAttribute(domain_entity, att_name, "fk")
             else:
-                self.__DE.addAttribute(domain_entity, att_name, "str")
+                if att_value.isdigit():
+                    self.__DE.addAttribute(domain_entity, att_name, "float")
+                else:
+                    self.__DE.addAttribute(domain_entity, att_name, "str")
         if "pending_where_clause" in user_data and user_data["pending_where_clause"]:
             for att_name in user_data["pending_where_clause"].keys():
                 if self.__DE.entityExists(att_name):
                     self.__DE.addAttribute(domain_entity, att_name, "fk")
                 else:
-                    self.__DE.addAttribute(domain_entity, att_name, "str")
+                    if att_value.isdigit():
+                        self.__DE.addAttribute(domain_entity, att_name, "float")
+                    else:
+                        self.__DE.addAttribute(domain_entity, att_name, "str")
         try:
             self.__IC.update_app_web()
         except BaseException:
@@ -290,7 +303,14 @@ class AutonomousController:
                                 # adding the fields
                                 for c in query_result.columns:
                                     if row[c]:
-                                        new_row = "<b>" + c + "</b>: " + str(row[c])
+                                        output = str(row[c])
+                                        if output == "nan":
+                                            continue
+                                        elif output[len(output)-2:] == ".0":
+                                            new_row = "<b>" + c + "</b>: " + output[:-2]
+                                        else: 
+                                            new_row = "<b>" + c + "</b>: " + output
+                                        
                                         if (
                                             len(new_row)
                                             > LENGTH_LIMIT_CHARS_TO_SHOW_IN_ROWS
@@ -350,10 +370,16 @@ class AutonomousController:
                     else:  # all right. one class use case
                         user_data["pending_class"] = parser.entity_class
                         # if is DELETE or READ use case, test if the class is in the domain
-                        print(user_data)
-                        if user_data["pending_class"] == "media":
-                            msg_return_list = MEDIA(self.__AE.media("student", "grade"))
-                        elif (
+                        words = msg.split()
+                        if words[1] in ANALYTICS[0]:
+                            msg_return_list = AVERAGE(self.__AE.average(msg), words)
+                        elif words[1] in ANALYTICS[1]:
+                            msg_return_list = HIGHEST(self.__AE.highest(msg), words)
+                        elif words[1] in ANALYTICS[2]:
+                            msg_return_list = LOWEST(self.__AE.lowest(msg), words)
+                        elif words[1] in ANALYTICS[3]:
+                            msg_return_list = SUM(self.__AE.sum(msg), words)
+                        elif ( 
                             not self.__DE.entityExists(user_data["pending_class"])
                         ) and (
                             (user_data["pending_intent"] == Intent.DELETE)

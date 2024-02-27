@@ -41,9 +41,9 @@ BYE = ["Ok! Thank you. See you next time!",
        "Thank you! If you need add some info, please text me."
        ]
 
-HELP = ["I'm a bot that helps you add your information in an organized, secure, and flexible way. Say what you want to add, update, delete or only get info. \nFor example, say something like <b><i>add a class with name 'Self-Adaptive Systems'</i></b>, <i>view classes</i>, or <b><i>delete class name 'Java'</i></b>.",
-        "I'm a bot that allows you to add your information using natural language. Like a traditional system, but more accessible and flexible.\nFor instance, to register a student, say <b><i>add student with gender 'Female', name 'Mary', email 'mary@school.com'</i> or <i>delete student name 'Mary'</i></b>.",
-        "I'm your bot that securely saves your information. I understand better direct sentences.\nThus let me know first what you want to do (add, read or delete some data), what type the information you want to operate (a student, a class, a class registration, etc.), and, finally, the data itself. \nSome examples:\n<b><i>add a teacher with name 'Paulo Henrique', gender 'Male'\ndelete a student with name 'Anderson'\nget the class with name 'Python'</i></b>"
+HELP = ["I'm a bot that helps you add your information in an organized, secure, and flexible way. Say what you want to add, update, delete or only get info. \n\nFor example, say something like: \n<b>Add operation:</b> <i>add a class with name 'Self-Adaptive Systems'</i> \n<b>Get operation:</b> <i>view classes</i> \n<b>Delete operation:</b> <i>delete class with name 'Java'</i> \n<b>Update operation:</b> <i>update class where name is 'Java', setting year '2024'</i> \n<b>Average operation:</b> <i>Get average class year</i> \n<b>Sum operation: </b> <i>Get sum of class year</i>\n<b>Analytics operation:</b> <i>Get greatest year from class</i> or <i>Get lowest year from class</i>",
+        "I'm a bot that allows you to add your information using natural language. Like a traditional system, but more accessible and flexible.\n\nFor instance, to register a student, say to: \n<b>Add:</b> <i>add student with gender 'Female', name 'Mary', email 'mary@school.com'</i> \n<b>Delete:</b> <i>delete student where name is 'Mary'</i> \n<b>Read:</b> <i>get students with gender 'Female'</i> \n<b>Update:</b> <i>update student where name is 'Mary', setting age '21'</i> \n<b>Analytics:</b> <i>get mean students age</i> or <i>get highest age from students</i> or <i>get sum of students age</i>",
+        "I'm your bot that securely saves your information. I understand better direct sentences.\nThus let me know first what you want to do (add, read, delete or update some data), what type the information you want to operate (a student, a class, a class registration, etc.), and, finally, the data itself. \n\nSome examples:\n<b><i>- Add a teacher with name 'Paulo Henrique', gender 'Male'\n- Delete a student with name 'Anderson'\n- Get the class with name 'Python'\n- Get average students grade\n- Get maximum cost from expense\n- Get lowest weight from cats\n- Get sum of expense cost</i></b>"
         ]
 
 CANCEL = ['No problem! The operation was canceled successfully.']
@@ -63,7 +63,7 @@ ATTRIBUTE_OK = lambda opr, clas, att, where: [
                                               f"Ok! I got it!\nWe are going to <b>{opr}</b> a <b>"
                                               f"{clas.replace('_', ' ').title()}</b>."
                                               + (f"\nWith <b>{', '.join([f'{key}: <i>{value}</i>' for key, value in att.items()])}</b>." if att else "")
-                                              + (f"\nOnly when <b>{where}</b>." if where else "")
+                                              + (f"\nOnly when <b>{', '.join([f'{key}: <i>{value}</i>' for key, value in where.items()])}</b>." if where else "")
                                               + f"\nSay <b>OK</b> to confirm or <b>CANCEL</b> to"
                                               f" cancel this operation."]
 
@@ -78,7 +78,17 @@ DELETE_SUCCESS = lambda n_del: [f"Ok! <b>{n_del}</b> registers deleted.",
 
 DELETE_FAILURE = ['Nothing to delete. Please, try again.']
 
-MEDIA = lambda media: [f"Media = {media}"]
+ANALYTICS = [['average', 'mean', 'middle', 'mid'],['highest', 'greatest', 'largest', 'maximum', 'biggest', 'most'], ['lowest', 'minimum', 'smallest', 'least'], ['sum', 'total', 'amount']]
+
+AVERAGE = lambda average, words: [f"Alright, here is the result!\n" +
+                                f"<b>{words[1].title()} {words[2]} {words[3]} = {average}</b>"]
+HIGHEST = lambda highest, words: [f"Alright here is the result!\n" +
+                                f"<b>{words[1].title()} {words[4]} {words[2]} = {highest}</b>"]
+LOWEST = lambda lowest, words: [f"Alright here is the result!\n" +
+                              f"<b>{words[1].title()} {words[4]} {words[2]} = {lowest}</b>"]
+
+SUM = lambda sum, words: [f"Alright here is the result!\n" +
+                          f"<b>{words[1].title()} of {words[3]} {words[4]} = {sum}</b>"]
 
 NO_REGISTERS = ['There are no info to show.']
 

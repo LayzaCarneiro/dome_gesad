@@ -2,7 +2,6 @@ import sqlite3
 
 class AnalyticsEngine:
     def __init__(self, AC):
-        super().__init__()
         # self.__IC = IC
         self.__AC = AC
         self.__TDB = None
@@ -15,14 +14,82 @@ class AnalyticsEngine:
 
         return result
     
-    def media(self, table, row):
-        sql_cmd = "SELECT AVG(" + row + ") AS media_pontuacao FROM managedsys_web_" + table
+    def __checkEntity(self, entity_name):
+        sql_cmd = "SELECT name FROM sqlite_master WHERE type ='table' AND name LIKE 'managedsys_web_" + entity_name + "';"
+        cursor = self.__executeSqlCmd(sql_cmd)
+        resultado = cursor.fetchone()
+        
+        return resultado
+        
+    def average(self, msg):
+        words = msg.split() # [get, average, students, age]
+        table, row = words[2], words[3] 
+        
+        if(self.__checkEntity(table)):
+            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table
+        elif(self.__checkEntity(table + "s")):
+            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table + "s"
+        elif(self.__checkEntity(table[:-1])):
+            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table[:-1]
+        else:
+            return "doesn't exist"
+            
+        cursor = self.__executeSqlCmd(sql_cmd)
+        resultado = cursor.fetchone()
+        
+        return round(resultado[0], 2)
+    
+    def highest(self, msg):
+        words = msg.split() # [get, highest, age, from, students]
+        table, row = words[4], words[2]
+        
+        if(self.__checkEntity(table)):
+            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table
+        elif(self.__checkEntity(table + "s")):
+            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table + "s"
+        elif(self.__checkEntity(table[:-1])):
+            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table[:-1]
+        else:
+            return "doesn't exist"
+        
         cursor = self.__executeSqlCmd(sql_cmd)
         resultado = cursor.fetchone()
         
         return resultado[0]
+    
+    def lowest(self, msg):
+        words = msg.split() # [get, lowest, age, from, students]
+        table, row = words[4], words[2]
         
-# Funções para retornar valores como média, maior valor, menor valor de uma tabela
-# Receber mensagem do user como "get media of students" or "get highest value" --> Fazer a parte de NLP 
-# Depois transformar esse NLP para comando SQL 
-# Retornar valor desejado
+        if(self.__checkEntity(table)):
+            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table
+        elif(self.__checkEntity(table + "s")):
+            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table + "s"
+        elif(self.__checkEntity(table[:-1])):
+            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table[:-1]
+        else:
+            return "doesn't exist"
+        
+        cursor = self.__executeSqlCmd(sql_cmd)
+        resultado = cursor.fetchone()
+        
+        return resultado[0]
+    
+    def sum(self, msg):
+        words = msg.split() # [get, sum, of, students, age]
+        table, row = words[3], words[4]
+        
+        if(self.__checkEntity(table)):
+            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table
+        elif(self.__checkEntity(table + "s")):
+            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table + "s"
+        elif(self.__checkEntity(table[:-1])):
+            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table[:-1]
+        else:
+            return "doesn't exist"
+        
+        cursor = self.__executeSqlCmd(sql_cmd)
+        resultado = cursor.fetchone()
+        
+        return round(resultado[0], 2)
+        

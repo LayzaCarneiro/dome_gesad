@@ -21,12 +21,12 @@ class DomainEngine:
             entity_name = row[0].replace(self.__getEntityDBNamePrefix(), '')
             entity_obj = self.saveEntity(entity_name)
             # getting attributes
-            sql_cmd = "SELECT name FROM PRAGMA_TABLE_INFO('" + row[0] + "') where name<>'id' and " \
+            sql_cmd = "SELECT name, type FROM PRAGMA_TABLE_INFO('" + row[0] + "') where name<>'id' and " \
                                                                         "name<>'dome_created_at' and " \
                                                                         "name<>'dome_updated_at';"
             query2 = self.__executeSqlCmd(sql_cmd)
-            for col_name in query2.fetchall():
-                entity_obj.addAttribute(col_name[0], 'string', False)  # TODO: manage type and notnull
+            for column in query2.fetchall(): # column has the name and type of attribute
+                entity_obj.addAttribute(column[0], column[1], False)  # TODO: manage type and notnull
 
     def saveEntity(self, entity_name):
         # TODO: update meta data (MDB) and Transaction Data (TDB)
@@ -166,7 +166,6 @@ class DomainEngine:
         # put limit to LIMIT_REGISTERS
         sql_cmd += " LIMIT " + str(LIMIT_REGISTERS)
 
-        print(sql_cmd)
         query = self.__executeSqlCmd(sql_cmd)
         cols = [column[0] for column in query.description]
         data = query.fetchall()

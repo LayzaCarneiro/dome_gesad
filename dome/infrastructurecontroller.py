@@ -189,7 +189,7 @@ class InterfaceController:
         strFileBuffer += '\nadmin.site.unregister(User)\n'
 
         overwriting_file(self.__webapp_path + '\\admin.py', strFileBuffer)
-
+                
         # update models.py
         if DEBUG_MODE and PRINT_DEBUG_MSGS:
             print('updating models.py...')
@@ -214,14 +214,15 @@ class InterfaceController:
                 # all fields with the same type, in this version.
                 if(att.type == 'fk'):
                     strFileBuffer += f'\n    {att.name} = models.ForeignKey({att.name.title()}, on_delete=models.CASCADE, null=True, blank=True)'
+                elif(att.type == 'float' or att.type== 'REAL'):
+                    strFileBuffer += f'\n    {att.name} = models.FloatField(null=True, blank=True)'
                 else:
                     strFileBuffer += f'\n    {att.name} = models.CharField(max_length=200, null={not att.notnull}, ' \
                                     f'blank={not att.notnull})'
-                                    
                 if len(attributes_to_use_in_str) < NUMBER_MAX_FIELDS_IN_MODELS_TO_STR_FUNCTION and \
                         att.name not in ['dome_created_at', 'dome_updated_at']:
                     attributes_to_use_in_str.append(att.name)
-
+                    
             if attributes_to_use_in_str:
                 # adding the __str__ method
                 strFileBuffer += '\n\n    def __str__(self):'
@@ -231,7 +232,7 @@ class InterfaceController:
                 strFileBuffer = strFileBuffer[:-3] + '"'
 
         # re-writing the model.py file
-        overwriting_file(self.__webapp_path + '\\models.py', strFileBuffer)
+        overwriting_file(self.__webapp_path + '\\models.py', strFileBuffer)      
         self.migrateModel()
 
     def update_app_web(self, run_server=False):
