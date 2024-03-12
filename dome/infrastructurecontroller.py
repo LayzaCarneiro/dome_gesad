@@ -248,7 +248,9 @@ class InterfaceController:
                 strFileBuffer = strFileBuffer[:-3] + '"'
 
         # re-writing the model.py file
-        overwriting_file(self.__webapp_path + '\\models.py', strFileBuffer)      
+        modelFile = self.__checkPath(self.__webapp_path + '\\models.py')
+        
+        overwriting_file(modelFile, strFileBuffer)      
         self.migrateModel()
 
     def update_app_web(self, run_server=False):
