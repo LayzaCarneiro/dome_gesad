@@ -75,6 +75,7 @@ class InterfaceController:
         print('creating django config dir...')
         self.__config_path = self.__checkPath(MANAGED_SYSTEM_NAME + SUFFIX_CONFIG)
         self.__settings_path = self.__checkPath(self.__config_path + '\\' + self.__config_path)
+        
         if not os.path.exists(self.__config_path):
             print('starting django project...')
             self.__runSyncCmd('Scripts\\django-admin.exe startproject ' + self.__config_path)  # synchronous
@@ -87,7 +88,10 @@ class InterfaceController:
             self.__runSyncCmd(
                 'Scripts\\python.exe  ' + self.__config_path + '\\manage.py startapp ' + self.__webapp_path)  # synchronous
             # extra setup in settings.py
-            for line in fileinput.FileInput(self.__settings_path + '\\settings.py', inplace=1):
+            
+            path = self.__checkPath(self.__settings_path + '\\settings.py')
+            
+            for line in fileinput.FileInput(path, inplace=1):
                 if "    'django.contrib.staticfiles'," in line:
                     line = line.replace(line, "    'livesync',\n" + line + "    '" + self.__webapp_path
                                         + '.apps.' + self.__webapp_path.replace('_', ' ').title().replace(' ', '')
@@ -121,8 +125,19 @@ class InterfaceController:
                              "\nadmin.site.index_title = \"" + MANAGED_SYSTEM_WEBAPP_TITLE + "\""
 
             print('updating urls.py file...')
+            
+            with open(self.__settings_path + "/settings.py", "r+") as file:
+                for line in file:
+                    if "import os, sys" in line:
+                        break
+                    else:  # not found, we are at the eof
+                        file.write(
+                            "import os, sys \nsys.path.append(os.path.join(BASE_DIR, '../'))"
+                        )  # append missing data
+
             # overwrite the urls.py file
-            overwriting_file(self.__settings_path + '\\urls.py', strFileContent)
+            urlPath = self.__checkPath(self.__settings_path + '\\urls.py')
+            overwriting_file(urlPath, strFileContent)
 
             self.migrateModel()
             # creating superuser
