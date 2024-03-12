@@ -134,7 +134,6 @@ class InterfaceController:
                         file.write(
                             "import os, sys \nsys.path.append(os.path.join(BASE_DIR, '../'))"
                         )  # append missing data
-
             # overwrite the urls.py file
             urlPath = self.__checkPath(self.__settings_path + '\\urls.py')
             overwriting_file(urlPath, strFileContent)
@@ -202,8 +201,10 @@ class InterfaceController:
 
         strFileBuffer += '\nadmin.site.unregister(Group)'
         strFileBuffer += '\nadmin.site.unregister(User)\n'
+        
+        adminPath = self.__checkPath(self.__webapp_path + '\\admin.py')
 
-        overwriting_file(self.__webapp_path + '\\admin.py', strFileBuffer)
+        overwriting_file(adminPath, strFileBuffer)
                 
         # update models.py
         if DEBUG_MODE and PRINT_DEBUG_MSGS:
@@ -259,7 +260,7 @@ class InterfaceController:
     def __getEntities(self) -> list:
         return self.__AC.getEntities()
 
-    def migrateModel(self):
+    def     migrateModel(self):
         if DEBUG_MODE and PRINT_DEBUG_MSGS:
             print('migrating model...')
 
