@@ -204,8 +204,14 @@ class AutonomousController:
         for att_name, att_value in user_data["pending_attributes"].items():
             if self.__DE.entityExists(att_name):
                 self.__DE.addAttribute(domain_entity, att_name, "fk")
-            else:
-                if att_value.isdigit():
+            else: 
+                ehFloat = False
+                try:
+                    float(att_value)
+                    ehFloat = True
+                except:
+                    pass          
+                if ehFloat:
                     self.__DE.addAttribute(domain_entity, att_name, "float")
                 else:
                     self.__DE.addAttribute(domain_entity, att_name, "str")
@@ -214,7 +220,13 @@ class AutonomousController:
                 if self.__DE.entityExists(att_name):
                     self.__DE.addAttribute(domain_entity, att_name, "fk")
                 else:
-                    if att_value.isdigit():
+                    ehFloat = False
+                    try:
+                        float(att_value)
+                        ehFloat = True
+                    except:
+                        pass          
+                    if ehFloat:
                         self.__DE.addAttribute(domain_entity, att_name, "float")
                     else:
                         self.__DE.addAttribute(domain_entity, att_name, "str")
