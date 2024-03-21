@@ -232,7 +232,9 @@ class AutonomousController:
                         self.__DE.addAttribute(domain_entity, att_name, "str")
         try:
             self.__IC.update_app_web()
-        except BaseException:
+        except Exception as e:
+            
+            print("ERRO: ", str(e))
             # rollback the entity and attributes
             self.__DE.init_entities()
             raise Exception("Error updating the model")
