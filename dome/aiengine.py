@@ -167,7 +167,8 @@ class AIEngine(DAO):
                        #'https://api-inference.huggingface.co/models/distilbert-base-cased-distilled-squad',
                        # https://huggingface.co/deepset/roberta-base-squad2
                        #'https://api-inference.huggingface.co/models/deepset/roberta-base-squad2',
-                       'https://api-inference.huggingface.co/models/google/flan-t5-xxl',
+                    #    'https://api-inference.huggingface.co/models/google/flan-t5-xxl',
+                       'https://api-inference.huggingface.co/models/google/flan-ul2',
                        ]
 
     @staticmethod
@@ -193,63 +194,63 @@ class AIEngine(DAO):
         return last_answer  # return some answer. All are different.
 
 
-    def question_answerer_remote_old(self, question, context, options=None):
-        API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-xl"
-        headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
+    # def question_answerer_remote_old(self, question, context, options=None):
+    #     API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-xl"
+    #     headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
 
-        def generate(input_text):
-            payload = {"inputs": input_text, "options": {"use_cache": True, "wait_for_model": True}}
-            __response = requests.post(API_URL, headers=headers, json=payload)
-            return __response.json()
+    #     def generate(input_text):
+    #         payload = {"inputs": input_text, "options": {"use_cache": True, "wait_for_model": True}}
+    #         __response = requests.post(API_URL, headers=headers, json=payload)
+    #         return __response.json()
 
-        def prompt(question_, context_, options_=None):
-            # input_text = '-QUESTION: %s-CONTEXT: %s-OPTIONS: %s' % (__question + '\n', fact + '\n', options)
-            input_text = '-QUESTION: %s-CONTEXT: %s' % (question_ + '\n', context_)
-            if options_:
-                input_text += '\n-OPTIONS: %s' % options_
-            if DEBUG_MODE and PRINT_DEBUG_MSGS:
-                print('PROMPT -------------------')
-                print(input_text)
-                print('--------------------------')
-            return generate(input_text)
+    #     def prompt(question_, context_, options_=None):
+    #         # input_text = '-QUESTION: %s-CONTEXT: %s-OPTIONS: %s' % (__question + '\n', fact + '\n', options)
+    #         input_text = '-QUESTION: %s-CONTEXT: %s' % (question_ + '\n', context_)
+    #         if options_:
+    #             input_text += '\n-OPTIONS: %s' % options_
+    #         if DEBUG_MODE and PRINT_DEBUG_MSGS:
+    #             print('PROMPT -------------------')
+    #             print(input_text)
+    #             print('--------------------------')
+    #         return generate(input_text)
 
-        prompt_answer = prompt(question, context, options)
-        response_str = prompt_answer[0]['generated_text']
-        response = {"answer": response_str}
+    #     prompt_answer = prompt(question, context, options)
+    #     response_str = prompt_answer[0]['generated_text']
+    #     response = {"answer": response_str}
 
-        if DEBUG_MODE and PRINT_DEBUG_MSGS:
-            print('RESPONSE -----------------')
-            print(response)
-            print('--------------------------')
+    #     if DEBUG_MODE and PRINT_DEBUG_MSGS:
+    #         print('RESPONSE -----------------')
+    #         print(response)
+    #         print('--------------------------')
 
-        return response
+    #     return response
 
-    def question_answerer_local(self, question, context, options=''):
-        models = ['deepset/roberta-base-squad2',
-                  'distilbert-base-cased-distilled-squad',
-                  'deepset/minilm-uncased-squad2']
+    # def question_answerer_local(self, question, context, options=''):
+    #     models = ['deepset/roberta-base-squad2',
+    #               'distilbert-base-cased-distilled-squad',
+    #               'deepset/minilm-uncased-squad2']
 
-        # iterate over models to find the best answer (the one with the highest score)
-        best_answer = None
-        best_score = 0
-        for model in models:
-            answer = self.__get_question_answer_pipeline(model)(question, context + '\n' + options)
-            if answer['score'] > PNL_GENERAL_THRESHOLD:
-                # return immediately if the answer is good enough
-                return answer
-            # else
-            if answer['score'] > best_score:
-                best_answer = answer
-                best_score = answer['score']
+    #     # iterate over models to find the best answer (the one with the highest score)
+    #     best_answer = None
+    #     best_score = 0
+    #     for model in models:
+    #         answer = self.__get_question_answer_pipeline(model)(question, context + '\n' + options)
+    #         if answer['score'] > PNL_GENERAL_THRESHOLD:
+    #             # return immediately if the answer is good enough
+    #             return answer
+    #         # else
+    #         if answer['score'] > best_score:
+    #             best_answer = answer
+    #             best_score = answer['score']
 
-        return best_answer
+    #     return best_answer
 
-    def __get_question_answer_pipeline(self, model):
-        return self.getPipeline(pipeline_name='question-answering', model=model,
-                                pipeline_key='question-answering-m_' + model)
+    # def __get_question_answer_pipeline(self, model):
+    #     return self.getPipeline(pipeline_name='question-answering', model=model,
+    #                             pipeline_key='question-answering-m_' + model)
 
-    def get_zero_shooter_pipeline(self):
-        return self.getPipeline(pipeline_name="zero-shot-classification", model="facebook/bart-large-mnli")
+    # def get_zero_shooter_pipeline(self):
+    #     return self.getPipeline(pipeline_name="zero-shot-classification", model="facebook/bart-large-mnli")
 
     def getPipeline(self, pipeline_name, model=None, config=None, aggregation_strategy=None, pipeline_key=None):
         if pipeline_name not in self.__pipelines:
