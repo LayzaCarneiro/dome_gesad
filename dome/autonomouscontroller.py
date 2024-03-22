@@ -1,6 +1,7 @@
 import datetime as dth
 import random
 import time
+import logging, logging.config
 
 from dome.aiengine import AIEngine, Intent
 from dome.auxiliary.constants import (
@@ -45,6 +46,12 @@ from dome.config import (
 from dome.domainengine import DomainEngine
 from dome.infrastructurecontroller import InterfaceController
 from dome.analyticsengine import AnalyticsEngine
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("Results.log")
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+logger.addHandler(file_handler)
+logger.setLevel(logging.INFO)
 
 
 class AutonomousController:
@@ -175,6 +182,9 @@ class AutonomousController:
             context = user_data
 
         user_data = context
+        
+        
+        logger.info('user_msg: %s', msg)
 
         try:
             response = self.app_chatbot_msg_process(msg, user_data=user_data)
@@ -192,6 +202,7 @@ class AutonomousController:
         self.__SE.save_msg_handle_log(
             msg, user_data["id"], response, time.perf_counter() - t0
         )
+        logger.info('response: %s', response["response_msg"])
 
         if DEBUG_MODE:
             return "<b>[DEBUG_MODE_ON]</b>\n" + response["response_msg"]
@@ -233,7 +244,7 @@ class AutonomousController:
         #     or user_data["session_expiration_time"] < dth.datetime.now()
         # ):
         #     self.clear_opr(user_data)
-
+        
         user_data["session_expiration_time"] = dth.datetime.now() + dth.timedelta(
             minutes=30
         )
