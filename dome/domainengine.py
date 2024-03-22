@@ -179,6 +179,6 @@ class DomainEngine:
     def delete(self, entity, attributes):
         sql_cmd = "DELETE FROM " + self.__getEntityDBName(entity) + " where "
         for k in attributes.keys():
-            sql_cmd += "LOWER(" + k + ") LIKE LOWER('%" + attributes[k] + "%') AND "
+            sql_cmd += "LOWER(" + k + ") = LOWER('" + attributes[k] + "') AND "
         sql_cmd = sql_cmd[:-4]  # removing the last AND
         return self.__executeSqlCmd(sql_cmd)
