@@ -215,8 +215,14 @@ class AutonomousController:
         for att_name, att_value in user_data["pending_attributes"].items():
             if self.__DE.entityExists(att_name):
                 self.__DE.addAttribute(domain_entity, att_name, "fk")
-            else:
-                if att_value.isdigit():
+            else: 
+                ehFloat = False
+                try:
+                    float(att_value)
+                    ehFloat = True
+                except:
+                    pass          
+                if ehFloat:
                     self.__DE.addAttribute(domain_entity, att_name, "float")
                 else:
                     self.__DE.addAttribute(domain_entity, att_name, "str")
@@ -225,13 +231,21 @@ class AutonomousController:
                 if self.__DE.entityExists(att_name):
                     self.__DE.addAttribute(domain_entity, att_name, "fk")
                 else:
-                    if att_value.isdigit():
+                    ehFloat = False
+                    try:
+                        float(att_value)
+                        ehFloat = True
+                    except:
+                        pass          
+                    if ehFloat:
                         self.__DE.addAttribute(domain_entity, att_name, "float")
                     else:
                         self.__DE.addAttribute(domain_entity, att_name, "str")
         try:
             self.__IC.update_app_web()
-        except BaseException:
+        except Exception as e:
+            
+            print("ERRO: ", str(e))
             # rollback the entity and attributes
             self.__DE.init_entities()
             raise Exception("Error updating the model")
