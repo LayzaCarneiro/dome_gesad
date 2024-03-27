@@ -71,6 +71,8 @@ SAVE_SUCCESS = ['Ok! Information saved successfully!',
                 'It done! Information saved. ;)',
                 "Yes! All done. We've saved your data with security."]
 
+UPDATE_FAILURE = ['Nothing to update. Please, try again.']
+
 DELETE_SUCCESS = lambda n_del: [f"Ok! <b>{n_del}</b> registers deleted.",
                                 f"Done! <b>{n_del}</b> deleted.",
                                 f"<b>{n_del}</b> registers deleted successfully."

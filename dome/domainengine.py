@@ -140,9 +140,9 @@ class DomainEngine:
                 if k == 'id':
                     sql_cmd += " id=" + where_clause[k] + " AND "
                 else:
-                    sql_cmd += "LOWER(" + k + ") LIKE LOWER('%" + where_clause[k] + "%') AND "
+                    sql_cmd += "LOWER(" + k + ") = LOWER('" + where_clause[k] + "') AND "
             sql_cmd = sql_cmd[:-4]  # removing the last AND
-        self.__executeSqlCmd(sql_cmd)
+        return self.__executeSqlCmd(sql_cmd)
 
     def read(self, entity, attributes):
         if not self.entityExists(entity):

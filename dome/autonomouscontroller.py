@@ -41,7 +41,7 @@ from dome.config import (
     AVERAGE,
     HIGHEST,
     LOWEST,
-    SUM
+    SUM, UPDATE_FAILURE
 )
 from dome.domainengine import DomainEngine
 from dome.infrastructurecontroller import InterfaceController
@@ -267,6 +267,7 @@ class AutonomousController:
         msg_return_list = MISUNDERSTANDING  # default
 
         if len(msg) <= MAX_USER_MSG_SIZE:
+            msg = msg.replace("'", "") #removing ' in mensage to prevent interpretation erorrs
             parser = self.__AIE.get_msg_parser(msg)
             if parser.intent == Intent.CONFIRMATION:
                 if (
@@ -289,12 +290,15 @@ class AutonomousController:
                         # updating the model
                         self.__update_model(user_data)
                         # updating the data
-                        self.__DE.update(
+                        query_result = self.__DE.update(
                             user_data["pending_class"],
                             user_data["pending_attributes"],
                             user_data["pending_where_clause"],
                         )
-                        msg_return_list = SAVE_SUCCESS
+                        if query_result.rowcount == 0:
+                            msg_return_list = UPDATE_FAILURE
+                        else:
+                            msg_return_list = SAVE_SUCCESS
                     elif user_data["pending_intent"] == Intent.DELETE:
                         query_result = self.__DE.delete(
                             user_data["pending_class"], user_data["pending_attributes"]
