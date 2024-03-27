@@ -384,6 +384,7 @@ class AutonomousController:
                     else:  # all right. one class use case
                         user_data["pending_class"] = parser.entity_class
                         # if is DELETE or READ use case, test if the class is in the domain
+                        msg = msg.replace("the", "")
                         words = msg.split()
                         if words[1] in ANALYTICS[0]:
                             msg_return_list = AVERAGE(self.__AE.average(msg), words)
