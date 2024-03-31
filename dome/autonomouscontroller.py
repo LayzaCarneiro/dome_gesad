@@ -45,6 +45,7 @@ from dome.config import (
 from dome.domainengine import DomainEngine
 from dome.infrastructurecontroller import InterfaceController
 from dome.analyticsengine import AnalyticsEngine
+from util import list_util
 
 
 class AutonomousController:
@@ -296,56 +297,7 @@ class AutonomousController:
                         else:
                             msg_return_list = DELETE_SUCCESS(query_result.rowcount)
                     elif user_data["pending_intent"] == Intent.READ:
-                        query_result = self.__DE.read(
-                            user_data["pending_class"], user_data["pending_attributes"]
-                        )
-                        if query_result is None:
-                            msg_return_list = NO_REGISTERS
-                        else:
-                            get_html = ""
-                            entity_url = (
-                                MANAGED_SYSTEM_WEBAPP_BASE_URL
-                                + "/"
-                                + user_data["pending_class"]
-                            )
-                            get_html += "Ok! Here is the result:\n\n"
-                            # iterating over the rows
-                            for index, row in query_result.iterrows():
-                                str_row = (
-                                    '<a href="' + entity_url + "/" + str(index) + '/">'
-                                )
-                                str_row += user_data["pending_class"].upper() + " ("
-                                str_row += "id: " + str(index) + ")"
-                                # adding the link to edit the row
-                                str_row += "</a>\n"
-                                # adding the fields
-                                for c in query_result.columns:
-                                    if row[c]:
-                                        output = str(row[c])
-                                        if output == "nan":
-                                            continue
-                                        elif output[len(output)-2:] == ".0":
-                                            new_row = "<b>" + c + "</b>: " + output[:-2]
-                                        else: 
-                                            new_row = "<b>" + c + "</b>: " + output
-                                        
-                                        if (
-                                            len(new_row)
-                                            > LENGTH_LIMIT_CHARS_TO_SHOW_IN_ROWS
-                                        ):
-                                            new_row = (
-                                                new_row[
-                                                    :LENGTH_LIMIT_CHARS_TO_SHOW_IN_ROWS
-                                                ]
-                                                + "..."
-                                            )
-                                        str_row += new_row + "\n"
-                                get_html += str_row
-
-                            get_html += "\n<i>" + LIMIT_REGISTERS_MSG + "</i>"
-
-                            msg_return_list = [get_html]
-
+                        msg_return_list = self.read_opr(user_data, "", 0)
                     self.clear_opr(user_data)
                 else:  # ok without pending intent
                     msg_return_list = CONFIRMATION_WITHOUT_PENDING_INTENT
@@ -398,6 +350,10 @@ class AutonomousController:
                             msg_return_list = LOWEST(self.__AE.lowest(msg), words)
                         elif words[1] in ANALYTICS[3]:
                             msg_return_list = SUM(self.__AE.sum(msg), words)
+                        elif list_util.compare(ANALYTICS[1], words):
+                            msg_return_list = self.read_opr(user_data, msg, 1)
+                        elif list_util.compare(ANALYTICS[2], words):
+                            msg_return_list = self.read_opr(user_data, msg, 2)
                         elif ( 
                             not self.__DE.entityExists(user_data["pending_class"])
                         ) and (
@@ -448,6 +404,66 @@ class AutonomousController:
 
         return return_dict
 
+
+    def read_opr(self, user_data, msg, option):
+
+        query_result = None
+
+        if option == 0:
+            query_result = self.__DE.read(
+                user_data["pending_class"], user_data["pending_attributes"]
+            )
+        elif option == 1: #get highest
+            query_result = self.__AE.get_object(msg, 1)
+        elif option == 2: #get lowest
+            query_result = self.__AE.get_object(msg, 2)
+
+        if query_result is None:
+            msg_return_list = NO_REGISTERS
+        else:
+            get_html = ""
+            entity_url = (
+                    MANAGED_SYSTEM_WEBAPP_BASE_URL
+                    + "/"
+                    + user_data["pending_class"]
+            )
+            get_html += "Ok! Here is the result:\n\n"
+            # iterating over the rows
+            for index, row in query_result.iterrows():
+                str_row = (
+                        '<a href="' + entity_url + "/" + str(index) + '/">'
+                )
+                str_row += user_data["pending_class"].upper() + " ("
+                str_row += "id: " + str(index) + ")"
+                # adding the link to edit the row
+                str_row += "</a>\n"
+                # adding the fields
+                for c in query_result.columns:
+                    if row[c]:
+                        output = str(row[c])
+                        if output == "nan":
+                            continue
+                        elif output[len(output) - 2:] == ".0":
+                            new_row = "<b>" + c + "</b>: " + output[:-2]
+                        else:
+                            new_row = "<b>" + c + "</b>: " + output
+
+                        if (
+                                len(new_row)
+                                > LENGTH_LIMIT_CHARS_TO_SHOW_IN_ROWS
+                        ):
+                            new_row = (
+                                    new_row[
+                                    :LENGTH_LIMIT_CHARS_TO_SHOW_IN_ROWS
+                                    ]
+                                    + "..."
+                            )
+                        str_row += new_row + "\n"
+                get_html += str_row
+
+            get_html += "\n<i>" + LIMIT_REGISTERS_MSG + "</i>"
+
+            return [get_html]
     def getTransactionDB_path(self):
         return self.__IC.getTransactionDB_path()
 

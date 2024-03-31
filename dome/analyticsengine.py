@@ -92,4 +92,41 @@ class AnalyticsEngine:
         resultado = cursor.fetchone()
         
         return round(resultado[0], 2)
-        
+
+    def get_object(self, msg, option):
+        words = msg.split()  # [get, product, with, highest, price]
+        table = words[1]
+        attribute = words[4]
+        new_msg = ""
+        attrbute_key = 0
+
+        if option == 1:
+            new_msg += "get highest " + attribute + " from " + table
+            attribute_key = self.highest(new_msg)
+        elif option == 2:
+            new_msg += "get lowest " + attribute + " from " + table
+            attribute_key = self.lowest(new_msg)
+        else:
+            return None
+
+        if (self.__checkEntity(table)):
+            sql_cmd = "SELECT * from managedsys_web_" + table + " where " + attribute + " = " + str(attribute_key)
+
+            # ordering by the newest
+            # dome_updated_at is a reserved field automatically updated by the system
+            sql_cmd += " ORDER BY dome_updated_at DESC"
+            # put limit to LIMIT_REGISTERS
+            sql_cmd += " LIMIT " + str(LIMIT_REGISTERS)
+            query = self.__executeSqlCmd(sql_cmd)
+            cols = [column[0] for column in query.description]
+            data = query.fetchall()
+            if len(data) == 0:
+                return None
+            # else
+            results = pd.DataFrame.from_records(data=data, columns=cols, index=['id'])
+            results.drop(['dome_created_at', 'dome_updated_at'], axis=1, inplace=True)
+            return results
+        else:
+            return None
+
+
