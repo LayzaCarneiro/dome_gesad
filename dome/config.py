@@ -92,6 +92,8 @@ LOWEST = lambda lowest, words: [f"Alright here is the result!\n" +
 SUM = lambda sum, words: [f"Alright here is the result!\n" +
                           f"<b>{words[1].title()} of {words[3]} {words[4]} = {sum}</b>"]
 
+DATE_KEYWORDS = ['at', 'on', 'in']
+
 NO_REGISTERS = ['There are no info to show.']
 
 LIMIT_REGISTERS = 10  # limit of registers to show

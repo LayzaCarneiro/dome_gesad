@@ -1,5 +1,11 @@
 import sqlite3
 
+import pandas as pd
+
+from dome.config import LIMIT_REGISTERS, DATE_KEYWORDS
+from util import list_util, date_util
+from datetime import datetime
+
 class AnalyticsEngine:
     def __init__(self, AC):
         # self.__IC = IC
@@ -23,75 +29,91 @@ class AnalyticsEngine:
         
     def average(self, msg):
         words = msg.split() # [get, average, students, age]
-        table, row = words[2], words[3] 
+        table, row = words[2], words[3]
+        date_prompt = self.date_filter(words)
         
         if(self.__checkEntity(table)):
-            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table
+            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table + date_prompt
         elif(self.__checkEntity(table + "s")):
-            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table + "s"
+            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table + "s" + date_prompt
         elif(self.__checkEntity(table[:-1])):
-            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table[:-1]
+            sql_cmd = "SELECT AVG(" + row + ") FROM managedsys_web_" + table[:-1] + date_prompt
         else:
             return "doesn't exist"
             
         cursor = self.__executeSqlCmd(sql_cmd)
-        resultado = cursor.fetchone()
-        
-        return round(resultado[0], 2)
+        result = cursor.fetchone()
+
+        if result[0] == None:
+            return -1
+
+        return round(result[0], 2)
     
     def highest(self, msg):
         words = msg.split() # [get, highest, age, from, students]
         table, row = words[4], words[2]
+        date_prompt = self.date_filter(words)
         
         if(self.__checkEntity(table)):
-            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table
+            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table + date_prompt
         elif(self.__checkEntity(table + "s")):
-            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table + "s"
+            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table + "s" + date_prompt
         elif(self.__checkEntity(table[:-1])):
-            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table[:-1]
+            sql_cmd = "SELECT MAX(" + row + ") FROM managedsys_web_" + table[:-1] + date_prompt
         else:
             return "doesn't exist"
         
         cursor = self.__executeSqlCmd(sql_cmd)
-        resultado = cursor.fetchone()
-        
-        return resultado[0]
+        result = cursor.fetchone()
+
+        if result[0] == None:
+            return -1
+
+        return result[0]
     
     def lowest(self, msg):
         words = msg.split() # [get, lowest, age, from, students]
         table, row = words[4], words[2]
+        date_prompt = self.date_filter(words)
         
         if(self.__checkEntity(table)):
-            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table
+            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table + date_prompt
         elif(self.__checkEntity(table + "s")):
-            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table + "s"
+            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table + "s" + date_prompt
         elif(self.__checkEntity(table[:-1])):
-            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table[:-1]
+            sql_cmd = "SELECT MIN(" + row + ") FROM managedsys_web_" + table[:-1] + date_prompt
         else:
             return "doesn't exist"
         
         cursor = self.__executeSqlCmd(sql_cmd)
-        resultado = cursor.fetchone()
-        
-        return resultado[0]
+        result = cursor.fetchone()
+
+        if result[0] == None:
+            return -1
+
+        return result[0]
     
     def sum(self, msg):
         words = msg.split() # [get, sum, of, students, age]
         table, row = words[3], words[4]
+        date_prompt = self.date_filter(words)
         
         if(self.__checkEntity(table)):
-            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table
+            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table + date_prompt
         elif(self.__checkEntity(table + "s")):
-            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table + "s"
+            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table + "s" + date_prompt
         elif(self.__checkEntity(table[:-1])):
-            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table[:-1]
+            sql_cmd = "SELECT SUM(" + row + ") FROM managedsys_web_" + table[:-1] + date_prompt
         else:
             return "doesn't exist"
         
         cursor = self.__executeSqlCmd(sql_cmd)
-        resultado = cursor.fetchone()
-        
-        return round(resultado[0], 2)
+        result = cursor.fetchone()
+
+        if result[0] == None:
+            return -1
+
+        return round(result[0], 2)
 
     def get_object(self, msg, option):
         words = msg.split()  # [get, product, with, highest, price]
@@ -130,3 +152,18 @@ class AnalyticsEngine:
             return None
 
 
+    def date_filter(self, words):
+
+        index = list_util.compare_index(words, DATE_KEYWORDS)
+        if index != -1:
+
+            date = words[index+1]
+            date = date_util.format(date)
+            return " WHERE DATE(dome_created_at) = " + date
+
+        elif "today" in words:
+
+            date = datetime.now().strftime("'%Y-%m-%d'")
+            return " WHERE DATE(dome_created_at) = " + date
+        else:
+            return ""
