@@ -343,13 +343,29 @@ class AutonomousController:
                         msg = msg.replace("the", "")
                         words = msg.split()
                         if words[1] in ANALYTICS[0]:
-                            msg_return_list = AVERAGE(self.__AE.average(msg), words)
+                            value = self.__AE.average(msg)
+                            if value == -1:
+                                msg_return_list = NO_REGISTERS
+                            else:
+                                msg_return_list = AVERAGE(value, words)
                         elif words[1] in ANALYTICS[1]:
-                            msg_return_list = HIGHEST(self.__AE.highest(msg), words)
+                            value = self.__AE.highest(msg)
+                            if value == -1:
+                                msg_return_list = NO_REGISTERS
+                            else:
+                                msg_return_list = HIGHEST(value, words)
                         elif words[1] in ANALYTICS[2]:
-                            msg_return_list = LOWEST(self.__AE.lowest(msg), words)
+                            value = self.__AE.lowest(msg)
+                            if value == -1:
+                                msg_return_list = NO_REGISTERS
+                            else:
+                                msg_return_list = LOWEST(value, words)
                         elif words[1] in ANALYTICS[3]:
-                            msg_return_list = SUM(self.__AE.sum(msg), words)
+                            value = self.__AE.sum(msg)
+                            if value == -1:
+                                msg_return_list = NO_REGISTERS
+                            else:
+                                msg_return_list = SUM(value, words)
                         elif list_util.compare(ANALYTICS[1], words):
                             msg_return_list = self.read_opr(user_data, msg, 1)
                         elif list_util.compare(ANALYTICS[2], words):
