@@ -36,8 +36,11 @@ https://developer.nvidia.com/cuda-downloads
 pip install -r requirements
 ```
 
+# Demonstration
+[DoME Chatbot - Demonstration Video](https://drive.google.com/file/d/1VWORlVXlQiY2iFF2gspuQnFosYd6wa1x/view?t=1)
+
 # Credits
 This project is linked with the Master's Degree Program of the University of State of Ceará (http://www.uece.br/ppgcc/). <br/>
 Project Supervisor: PhD Paulo Henrique Maia (https://gesad.github.io/team/paulo-henrique/)<br/>
 Project Creator: Anderson Martins Gomes (https://www.linkedin.com/in/amartinsg/)<br/>
-Students: Layza Maria Rodrigues Carneiro (www.linkedin.com/in/layzacarneiro), Márcio Gabriel Da Silva Ferreira and Gabriel Luiz Barros De Oliveira.
+Students: Layza Maria Rodrigues Carneiro (www.linkedin.com/in/layzacarneiro), Márcio Gabriel Da Silva Ferreira (https://linkedin.com/in/marciogabrielsf) and Gabriel Luiz Barros De Oliveira.
