@@ -155,7 +155,8 @@ class AutonomousController:
             context.user_data.update(user_data)
 
         user_data = context.user_data
-
+        
+        logger.info('[user_id: %s] user_msg: %s', user_data['id'], msg)
         try:
             response = self.app_chatbot_msg_process(msg, user_data=user_data)
         except BaseException as e:
@@ -168,6 +169,8 @@ class AutonomousController:
 
         # logging the message handled
         self.__SE.save_msg_handle_log(msg, user_data['id'], response, time.perf_counter() - t0)
+        logger.info('[user_id: %s] response: %s', user_data['id'],response["response_msg"])
+
 
         if DEBUG_MODE:
             return "<b>[DEBUG_MODE_ON]</b>\n" + response['response_msg'] 
