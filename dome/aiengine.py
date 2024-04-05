@@ -9,9 +9,10 @@ from dome.auxiliary.DAO import DAO
 from dome.auxiliary.enums.intent import Intent
 from dome.config import (PNL_GENERAL_THRESHOLD, USELESS_EXPRESSIONS_FOR_INTENT_DISCOVERY, TIMEOUT_MSG_PARSER,
                          DEBUG_MODE, USE_PARSER_CACHE, HUGGINGFACE_TOKEN, WHERE_CLAUSE_WORDS, INTENT_MAP,
-                         PRINT_DEBUG_MSGS)
+                         PRINT_DEBUG_MSGS, DATE_KEYWORDS)
 import re
 
+from datetime import datetime
 
 class AIEngine(DAO):
     def get_db_file_name(self) -> str:
@@ -69,8 +70,7 @@ class AIEngine(DAO):
                     tokens[i - 1]['end'] = tokens[i]['end']
                     tokens[i]['entity'] = None
                     tokens[i]['word'] = None
-                elif 0 < i < (len(tokens) - 1) and tokens[i]['word'] == '-' and tokens[i - 1]['entity'] == 'NOUN' and \
-                        tokens[i + 1]['entity'] == 'NOUN':
+                elif 0 < i < (len(tokens) - 1) and (tokens[i]['word'] == '-' or tokens[i]['word'] == '_'):
                     # merge the token that is a hyphen with the previous and next token
                     tokens[i - 1]['word'] += tokens[i]['word'] + tokens[i + 1]['word']
                     tokens[i - 1]['end'] = tokens[i + 1]['end']
@@ -613,6 +613,7 @@ class AIEngine(DAO):
 
             # finding the index of the entity class name in the message
             entity_class_token_idx = -1
+
             for i, token_i in enumerate(self.tokens):
                 # advance forward until the token of the entity class is found
                 if self.__AIE.get_entity_name_by_alternative(token_i['word']) == self.entity_class:
@@ -621,12 +622,31 @@ class AIEngine(DAO):
 
             # iterate over the tokens and find the attribute names and values
             j = 0
+
             while j < len(self.tokens):
                 # advance forward until the token of the type "NOUN" is found (i.e. the first noun it is an
                 # attribute name)
                 token_j = None
                 while j < len(self.tokens) and token_j is None:
                     if self.tokens[j]['entity'] == 'NOUN' and j != entity_class_token_idx:
+
+                        if self.tokens[j]['word'] == 'today':  # if the user is refering to now
+                            date = datetime.now().strftime("%Y-%m-%d")
+                            processed_attributes['dome_created_at'] = date
+                            return processed_attributes, where_clause_attributes
+                        elif 'last' in self.tokens[j]['word']:
+                            processed_attributes['last_clause'] = 'true'
+                            self.entity_class = self.entity_class.replace('last', '').replace('_', '')
+                            return processed_attributes, where_clause_attributes
+
+                        token_j = self.tokens[j]
+
+                    elif self.tokens[j]['word'] == 'dome_created_at' or self.tokens[j]['word'] in DATE_KEYWORDS:
+
+                        # replace the date keyword in the mensage to the new attribute key name (dome_created_at)
+                        self.user_msg = re.sub(r'\b' + re.escape(self.tokens[j]['word']) + r'\b', 'dome_created_at',
+                                               self.user_msg)
+                        self.tokens[j]['word'] = 'dome_created_at'
                         token_j = self.tokens[j]
                     else:
                         j += 1
@@ -641,7 +661,7 @@ class AIEngine(DAO):
                     # ask by the attribute value using question-answering pipeline
                     response = self.question_answerer(question="What is the '" + attribute_name +
                                                                "' in the sentence fragment?"
-                                                            "\nAnswer me with the exact substring of the sentence fragment." \
+                                                               "\nAnswer me with the exact substring of the sentence fragment." \
                                                                "\nAnswer me with only the value of the attribute."
                                                       , context=__get_attributes_context(attribute_name, token_j))
 
