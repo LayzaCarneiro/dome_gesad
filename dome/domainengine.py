@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 
 from dome.config import LIMIT_REGISTERS
+from util import date_util
 
 
 class DomainEngine:
@@ -149,7 +150,6 @@ class DomainEngine:
             return None
         # else: entity exists
         entity_obj = self.__entities_map[entity]
-
         sql_cmd = "SELECT * FROM " + self.__getEntityDBName(entity) + " where (1=1)"
         for k in attributes.keys():
             if k == 'id':
@@ -157,6 +157,24 @@ class DomainEngine:
             # checking if the attribute exists for the current entity
             elif k in entity_obj.getAttributes():
                 sql_cmd += " AND LOWER(" + k + ") LIKE LOWER('%" + attributes[k] + "%')"
+            elif k == 'dome_created_at':
+                attributes[k] = date_util.format(attributes[k])
+                sql_cmd += " AND DATE(dome_created_at) = " + attributes[k]
+            elif k == 'last_clause':
+                # ordering by the newest
+                # dome_updated_at is a reserved field automatically updated by the system
+                sql_cmd += " ORDER BY dome_updated_at DESC"
+                # put limit to LIMIT_REGISTERS
+                sql_cmd += " LIMIT " + str(1)
+                query = self.__executeSqlCmd(sql_cmd)
+                cols = [column[0] for column in query.description]
+                data = query.fetchall()
+                if len(data) == 0:
+                    return None
+                # else
+                results = pd.DataFrame.from_records(data=data, columns=cols, index=['id'])
+                results.drop(['dome_created_at', 'dome_updated_at'], axis=1, inplace=True)
+                return results
             else:
                 return None  # there is no that attribute in entity
 
@@ -165,7 +183,6 @@ class DomainEngine:
         sql_cmd += " ORDER BY dome_updated_at DESC"
         # put limit to LIMIT_REGISTERS
         sql_cmd += " LIMIT " + str(LIMIT_REGISTERS)
-
         query = self.__executeSqlCmd(sql_cmd)
         cols = [column[0] for column in query.description]
         data = query.fetchall()
