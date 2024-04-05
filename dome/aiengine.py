@@ -614,7 +614,7 @@ class AIEngine(DAO):
 
             # finding the index of the entity class name in the message
             entity_class_token_idx = -1
-
+            entity_find = None
             for i, token_i in enumerate(self.tokens):
                 # advance forward until the token of the entity class is found
                 if self.__AIE.get_entity_name_by_alternative(token_i['word']) == self.entity_class:
@@ -631,6 +631,10 @@ class AIEngine(DAO):
                 while j < len(self.tokens) and token_j is None:
                     if self.tokens[j]['entity'] == 'NOUN' and j != entity_class_token_idx:
 
+                        if entity_find is not None:
+                            processed_attributes[self.tokens[entity_class_token_idx]['word']] = entity_find
+                            return processed_attributes, where_clause_attributes
+
                         if self.tokens[j]['word'] == 'today':  # if the user is refering to now
                             date = datetime.now().strftime("%Y-%m-%d")
                             processed_attributes['dome_created_at'] = date
@@ -642,6 +646,9 @@ class AIEngine(DAO):
 
                         token_j = self.tokens[j]
 
+                    elif self.tokens[j]['entity'] == 'PROPN':
+                        entity_find = self.tokens[j]['word']
+                        j += 1
                     elif self.tokens[j]['word'] == 'dome_created_at' or self.tokens[j]['word'] in DATE_KEYWORDS:
 
                         # replace the date keyword in the mensage to the new attribute key name (dome_created_at)

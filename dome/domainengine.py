@@ -157,6 +157,12 @@ class DomainEngine:
             # checking if the attribute exists for the current entity
             elif k in entity_obj.getAttributes():
                 sql_cmd += " AND LOWER(" + k + ") LIKE LOWER('%" + attributes[k] + "%')"
+            elif k == entity:
+                sql_cmd += " AND LOWER(" + attributes[k] + ") IN ("
+                for attribute in entity_obj.getAttributes():
+                    sql_cmd += attribute.name + ", "
+                sql_cmd = sql_cmd[:-2]
+                sql_cmd += ");"
             elif k == 'dome_created_at':
                 attributes[k] = date_util.format(attributes[k])
                 sql_cmd += " AND DATE(dome_created_at) = " + attributes[k]
